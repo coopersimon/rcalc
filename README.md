@@ -26,6 +26,9 @@ The special variable `ans` can be used to get the result of the previous express
 
 Running an expression with just `q` or `quit` exits the program. Therefore, `q` is not recommended to be used as a variable name.
 
+### Types
+Integer and floating-point (both 64-bit). There are no explicit conversions between types (yet), however integer precision is kept whenever possible. If a fraction is formed from a division of two integers, then the result is converted to a floating-point.
+
 ### Flags
 `--help` for help.
 
@@ -35,4 +38,6 @@ Set `-b` for binary output, `-o` for octal and `-h` for hexadecimal. These can b
 
 ### TODO
 - Multi-expression statements, separated by `;`.
-- Base conversion.
+- Better parse error messages.
+- Setting of output type.
+- Explicit rounding/casting.

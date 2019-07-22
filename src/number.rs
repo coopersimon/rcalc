@@ -3,7 +3,8 @@ use std::{
         Add,
         Sub,
         Mul,
-        Div
+        Div,
+        Neg
     },
     fmt::{
         Display,
@@ -163,6 +164,19 @@ impl Div for Number {
             (Integer(l), Fraction(r))   => Fraction(l as Ftype / r),
             (Fraction(l), Integer(r))   => Fraction(l / r as Ftype),
             (Fraction(l), Fraction(r))  => Fraction(l / r),
+        }
+    }
+}
+
+impl Neg for Number {
+    type Output = Self;
+
+    fn neg(self) -> Self {
+        use Number::*;
+
+        match self {
+            Integer(i)  => Integer(-i),
+            Fraction(f) => Fraction(-f)
         }
     }
 }
