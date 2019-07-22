@@ -1,0 +1,32 @@
+use std::str::FromStr;
+use crate::expr::Expr;
+use crate::number::Number;
+
+grammar;
+
+pub Expr: Box<Expr> = {
+    AddSubExpr
+};
+
+AddSubExpr: Box<Expr> = {
+    <l:AddSubExpr> "+" <r:MulDivExpr> => Box::new(Expr::Add(l, r)),
+    <l:AddSubExpr> "-" <r:MulDivExpr> => Box::new(Expr::Sub(l, r)),
+    MulDivExpr,
+};
+
+MulDivExpr: Box<Expr> = {
+    <l:MulDivExpr> "*" <r:Term> => Box::new(Expr::Mul(l, r)),
+    <l:MulDivExpr> "/" <r:Term> => Box::new(Expr::Div(l, r)),
+    Term,
+};
+
+Term: Box<Expr> = {
+    <n:Num> => Box::new(Expr::Num(n)),
+    "(" <Expr> ")"
+};
+
+Num: Number = {
+    r"\.[0-9]+"         => Number::Fraction(f64::from_str(<>).unwrap()),
+    r"[0-9]+\.[0-9]*"   => Number::Fraction(f64::from_str(<>).unwrap()),
+    r"[0-9]+"           => Number::Integer(i64::from_str(<>).unwrap())
+};

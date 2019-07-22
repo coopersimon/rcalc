@@ -1,0 +1,13 @@
+[package]
+name = "rcalc"
+version = "0.1.0"
+authors = ["Simon Cooper"]
+edition = "2018"
+
+[build-dependencies]
+lalrpop = "0.17.1"
+
+[dependencies]
+lalrpop-util = "0.17.1"
+regex = "0.2.1"
+clap = "2"
