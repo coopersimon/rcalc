@@ -20,8 +20,8 @@ fn main() {
         (about: "Calculator used for simple maths and base conversion.")
         (@arg EXPR: "The expression to evaluate. If this is omitted, calc launches an interpreter.")
         (@group base =>
-            (@arg dec: -d "Sets the output to decimal (default).")
             (@arg bin: -b "Sets the output to binary.")
+            (@arg oct: -o "Sets the output to octal.")
             (@arg hex: -h "Sets the output to hexadecimal.")
         )
         (@arg precision: -p +takes_value "Sets the precision of the answer.")
