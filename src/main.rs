@@ -8,6 +8,7 @@ use clap::{clap_app, crate_version};
 
 use std::io;
 
+use number::Base;
 use state::State;
 
 lalrpop_mod!(pub rcalc);
@@ -18,9 +19,26 @@ fn main() {
         (author: "Simon Cooper")
         (about: "Calculator used for simple maths and base conversion.")
         (@arg EXPR: "The expression to evaluate. If this is omitted, calc launches an interpreter.")
+        (@group base =>
+            (@arg dec: -d "Sets the output to decimal (default).")
+            (@arg bin: -b "Sets the output to binary.")
+            (@arg hex: -h "Sets the output to hexadecimal.")
+        )
+        (@arg precision: -p +takes_value "Sets the precision of the answer.")
     );
 
     let cmd_args = app.get_matches();
+
+    let precision = cmd_args.value_of("precision").map(|s| s.parse::<usize>().expect("Couldn't parse precision value."));
+    let base = if cmd_args.is_present("bin") {
+        Base::Binary(precision)
+    } else if cmd_args.is_present("hex") {
+        Base::Hexadecimal(precision)
+    } else if cmd_args.is_present("oct") {
+        Base::Octal(precision)
+    } else {
+        Base::Decimal(precision)
+    };
 
     if let Some(expr) = cmd_args.value_of("EXPR") {
         let parser = rcalc::ExprParser::new();
@@ -29,15 +47,15 @@ fn main() {
         let mut state = State::new();
 
         match expr.eval(&mut state) {
-            Ok(v) => println!("{}", v),
+            Ok(v) => println!("{}", v.base_string(&base)),
             Err(e) => println!("Error: {}", e)
         }
     } else {
-        interpret();
+        interpret(&base);
     }
 }
 
-fn interpret() {
+fn interpret(init_base: &Base) {
     let parser = rcalc::ExprParser::new();
     let mut state = State::new();
 
@@ -55,7 +73,7 @@ fn interpret() {
             let expr = parser.parse(trimmed).unwrap();
             match expr.eval(&mut state) {
                 Ok(v) => {
-                    println!("\t= {}", v);
+                    println!("\t= {}", v.base_string(init_base));
                     state.set_ans(v);
                 },
                 Err(e) => {

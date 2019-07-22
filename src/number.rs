@@ -15,10 +15,58 @@ use std::{
 pub type Itype = i64;
 pub type Ftype = f64;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
+pub enum Base {
+    Decimal(Option<usize>),
+    Binary(Option<usize>),
+    Octal(Option<usize>),
+    Hexadecimal(Option<usize>)
+}
+
+#[derive(Clone)]
 pub enum Number {
     Integer(Itype),
     Fraction(Ftype)
+}
+
+impl Number {
+    pub fn base_string(&self, base: &Base) -> String {
+        use self::Number::*;
+        use self::Base::*;
+        match self {
+            Integer(i) => match base {
+                Decimal(p)      => if let Some(p) = p {
+                    format!("{:1$}", i, p)
+                } else {
+                    format!("{}", i)
+                },
+                Binary(p)       => if let Some(p) = p {
+                    format!("{:#01$b}", i, p+2)
+                } else {
+                    format!("{:#b}", i)
+                },
+                Octal(p)        => if let Some(p) = p {
+                    format!("{:#01$o}", i, p+2)
+                } else {
+                    format!("{:#o}", i)
+                },
+                Hexadecimal(p)  => if let Some(p) = p {
+                    format!("{:#01$X}", i, p+2)
+                } else {
+                    format!("{:#X}", i)
+                }
+            },
+            Fraction(f) => {
+                match base {
+                    Decimal(p)  => if let Some(p) = p {
+                        return format!("{:.*}", p, f);
+                    },
+                    _   => ()
+                }
+                format!("{}", f)
+            }
+        }
+    }
 }
 
 impl Display for Number {
