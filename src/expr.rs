@@ -1,7 +1,14 @@
+use super::error::RuntimeError;
 use super::number::Number;
+use super::state::State;
+
+type ExprRet = Result<Number, RuntimeError>;
 
 pub enum Expr {
+    SetVar(String, Box<Expr>),
+    Ans,
     Num(Number),
+    Var(String),
     Add(Box<Expr>, Box<Expr>),
     Sub(Box<Expr>, Box<Expr>),
     Mul(Box<Expr>, Box<Expr>),
@@ -9,14 +16,21 @@ pub enum Expr {
 }
 
 impl Expr {
-    pub fn eval(&self) -> Number {
+    pub fn eval(&self, state: &mut State) -> ExprRet {
         use self::Expr::*;
         match self {
-            Num(n)      => n.clone(),
-            Add(l, r)   => l.eval() + r.eval(),
-            Sub(l, r)   => l.eval() - r.eval(),
-            Mul(l, r)   => l.eval() * r.eval(),
-            Div(l, r)   => l.eval() / r.eval(),
+            SetVar(v, e)    => {
+                let val = e.eval(state)?;
+                state.set_var(&v, val.clone());
+                Ok(val)
+            },
+            Ans         => state.get_ans().ok_or(RuntimeError::AnsNotDefined),
+            Num(n)      => Ok(n.clone()),
+            Var(v)      => state.get_var(&v).ok_or(RuntimeError::VarNotDefined(v.clone())),
+            Add(l, r)   => Ok(l.eval(state)? + r.eval(state)?),
+            Sub(l, r)   => Ok(l.eval(state)? - r.eval(state)?),
+            Mul(l, r)   => Ok(l.eval(state)? * r.eval(state)?),
+            Div(l, r)   => Ok(l.eval(state)? / r.eval(state)?),
         }
     }
 }

@@ -5,8 +5,11 @@ use crate::number::Number;
 grammar;
 
 pub Expr: Box<Expr> = {
+    <v:Var> "=" <e:AddSubExpr>  => Box::new(Expr::SetVar(v, e)),
     AddSubExpr
 };
+
+Var: String = r"[a-z][0-9]*" => <>.to_string();
 
 AddSubExpr: Box<Expr> = {
     <l:AddSubExpr> "+" <r:MulDivExpr> => Box::new(Expr::Add(l, r)),
@@ -22,6 +25,8 @@ MulDivExpr: Box<Expr> = {
 
 Term: Box<Expr> = {
     <n:Num> => Box::new(Expr::Num(n)),
+    <v:Var> => Box::new(Expr::Var(v)),
+    "ans"   => Box::new(Expr::Ans),
     "(" <Expr> ")"
 };
 
