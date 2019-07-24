@@ -24,8 +24,8 @@ AddSubExpr: Box<Expr> = {
 };
 
 MulDivExpr: Box<Expr> = {
-    <l:MulDivExpr> "*" <r:Term> => Box::new(Expr::Mul(l, r)),
-    <l:MulDivExpr> "/" <r:Term> => Box::new(Expr::Div(l, r)),
+    <l:MulDivExpr> "*" <r:Unary> => Box::new(Expr::Mul(l, r)),
+    <l:MulDivExpr> "/" <r:Unary> => Box::new(Expr::Div(l, r)),
     Unary,
 };
 
