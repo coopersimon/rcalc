@@ -6,15 +6,21 @@ Like my previous calc project, only written in Rust. I use it as a tool for my o
 This is cleaner, maybe faster, and offers new functionality.
 
 ### Usage
-Right now, single expressions are possible in a one-shot command:
+Right now, expressions are possible in a one-shot command:
 ```
 rcalc "5 / 3"
 rcalc "0b4 * 0x2d"
 ```
 
+Multiple expressions can be evaluated in one go using `;` as a separator:
+```
+rcalc "4 * 23; 2.12 + 3"
+rcalc "3 * 5; ans / -100"
+```
+
 Also, the interpreter can be entered by simply running `rcalc`, then multiple expressions can be evaluated.
 
-In interpreted mode, variables can be used to save values:
+Variables can be used to save values, where `[var_name] = [expr]` is an expression:
 ```
 v = 5 / 3
 v * 20
@@ -37,7 +43,6 @@ Set `-b` for binary output, `-o` for octal and `-h` for hexadecimal. These can b
 `-pN` can also be used by itself with decimal (floating-point) numbers to set the number of decimal places.
 
 ### TODO
-- Multi-expression statements, separated by `;`.
 - Better parse error messages.
 - Setting of output type.
 - Explicit rounding/casting.

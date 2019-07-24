@@ -5,10 +5,11 @@ use super::state::State;
 type ExprRet = Result<Number, RuntimeError>;
 
 pub enum Expr {
-    SetVar(String, Box<Expr>),
     Ans,
     Num(Number),
     Var(String),
+    SetVar(String, Box<Expr>),
+    
     Neg(Box<Expr>),
     Add(Box<Expr>, Box<Expr>),
     Sub(Box<Expr>, Box<Expr>),

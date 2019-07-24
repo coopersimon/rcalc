@@ -1,8 +1,14 @@
 use std::str::FromStr;
 use crate::expr::Expr;
+use crate::exprlist::ExprList;
 use crate::number::Number;
 
 grammar;
+
+pub ExprList: Box<ExprList> = {
+    <e:Expr> ";" <l:ExprList>   => Box::new(ExprList::Node{next: l, expr: e}),
+    <e:Expr>                    => Box::new(ExprList::Node{next: Box::new(ExprList::Null), expr: e})
+};
 
 pub Expr: Box<Expr> = {
     <v:Var> "=" <e:AddSubExpr>  => Box::new(Expr::SetVar(v, e)),
