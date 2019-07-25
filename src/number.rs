@@ -13,6 +13,8 @@ use std::{
     }
 };
 
+use super::error::RuntimeError;
+
 pub type Itype = i64;
 pub type Ftype = f64;
 
@@ -23,6 +25,8 @@ pub enum Base {
     Octal(Option<usize>),
     Hexadecimal(Option<usize>)
 }
+
+pub type NumberResult = Result<Number, RuntimeError>;
 
 #[derive(Clone)]
 pub enum Number {
@@ -113,10 +117,10 @@ impl Operator for AddOperator {
 }
 
 impl Add for Number {
-    type Output = Self;
+    type Output = NumberResult;
 
-    fn add(self, other: Self) -> Self {
-        operate::<AddOperator>(self, other)
+    fn add(self, other: Self) -> Self::Output {
+        Ok(operate::<AddOperator>(self, other))
     }
 }
 
@@ -126,10 +130,10 @@ impl Operator for SubOperator {
 }
 
 impl Sub for Number {
-    type Output = Self;
+    type Output = NumberResult;
 
-    fn sub(self, other: Self) -> Self {
-        operate::<SubOperator>(self, other)
+    fn sub(self, other: Self) -> Self::Output {
+        Ok(operate::<SubOperator>(self, other))
     }
 }
 
@@ -139,44 +143,53 @@ impl Operator for MulOperator {
 }
 
 impl Mul for Number {
-    type Output = Self;
+    type Output = NumberResult;
 
-    fn mul(self, other: Self) -> Self {
-        operate::<MulOperator>(self, other)
+    fn mul(self, other: Self) -> Self::Output {
+        Ok(operate::<MulOperator>(self, other))
     }
 }
 
 impl Div for Number {
-    type Output = Self;
+    type Output = NumberResult;
 
-    fn div(self, other: Self) -> Self {
+    fn div(self, other: Self) -> Self::Output {
         use Number::*;
-        match (self, other) {
-            (Integer(l), Integer(r)) => {
-                let d = l as Ftype / r as Ftype;
-                let i = l / r;
-                if i as Ftype == d {
-                    Integer(i)
-                } else {
-                    Fraction(d)
+        match other {
+            Integer(0)  => Err(RuntimeError::DivByZero),
+            other       => {
+                let ans = match (self, other) {
+                    (Integer(l), Integer(r)) => {
+                        let d = l as Ftype / r as Ftype;
+                        let i = l / r;
+                        if i as Ftype == d {
+                            Integer(i)
+                        } else {
+                            Fraction(d)
+                        }
+                    },
+                    (Integer(l), Fraction(r))   => Fraction(l as Ftype / r),
+                    (Fraction(l), Integer(r))   => Fraction(l / r as Ftype),
+                    (Fraction(l), Fraction(r))  => Fraction(l / r),
+                };
+                match ans {
+                    Fraction(f) => if f.is_finite() { Ok(ans) } else { Err(RuntimeError::NaNFloatResult) },
+                    other       => Ok(other)
                 }
-            },
-            (Integer(l), Fraction(r))   => Fraction(l as Ftype / r),
-            (Fraction(l), Integer(r))   => Fraction(l / r as Ftype),
-            (Fraction(l), Fraction(r))  => Fraction(l / r),
+            }
         }
     }
 }
 
 impl Neg for Number {
-    type Output = Self;
+    type Output = NumberResult;
 
-    fn neg(self) -> Self {
+    fn neg(self) -> Self::Output {
         use Number::*;
 
-        match self {
+        Ok(match self {
             Integer(i)  => Integer(-i),
             Fraction(f) => Fraction(-f)
-        }
+        })
     }
 }

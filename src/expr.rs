@@ -1,8 +1,8 @@
 use super::error::RuntimeError;
-use super::number::Number;
+use super::number::{NumberResult, Number};
 use super::state::State;
 
-type ExprRet = Result<Number, RuntimeError>;
+use std::ops::Neg;
 
 pub enum Expr {
     Ans,
@@ -18,7 +18,7 @@ pub enum Expr {
 }
 
 impl Expr {
-    pub fn eval(&self, state: &mut State) -> ExprRet {
+    pub fn eval(&self, state: &mut State) -> NumberResult {
         use self::Expr::*;
         match self {
             SetVar(v, e)    => {
@@ -29,11 +29,11 @@ impl Expr {
             Ans         => state.get_ans().ok_or(RuntimeError::AnsNotDefined),
             Num(n)      => Ok(n.clone()),
             Var(v)      => state.get_var(&v).ok_or(RuntimeError::VarNotDefined(v.clone())),
-            Neg(e)      => Ok(- e.eval(state)?),
-            Add(l, r)   => Ok(l.eval(state)? + r.eval(state)?),
-            Sub(l, r)   => Ok(l.eval(state)? - r.eval(state)?),
-            Mul(l, r)   => Ok(l.eval(state)? * r.eval(state)?),
-            Div(l, r)   => Ok(l.eval(state)? / r.eval(state)?),
+            Neg(e)      => e.eval(state)?.neg(),
+            Add(l, r)   => l.eval(state)? + r.eval(state)?,
+            Sub(l, r)   => l.eval(state)? - r.eval(state)?,
+            Mul(l, r)   => l.eval(state)? * r.eval(state)?,
+            Div(l, r)   => l.eval(state)? / r.eval(state)?,
         }
     }
 }

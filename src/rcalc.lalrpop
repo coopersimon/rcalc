@@ -45,7 +45,7 @@ Num: Number = {
     r"\.[0-9]+"         => Number::Fraction(f64::from_str(<>).unwrap()),
     r"[0-9]+\.[0-9]*"   => Number::Fraction(f64::from_str(<>).unwrap()),
     r"0x[0-9a-fA-F]+"   => Number::Integer(i64::from_str_radix(&<>[2..], 16).unwrap()),
-    r"0[0-7]+"          => Number::Integer(i64::from_str_radix(<>, 8).unwrap()),
+    r"0[0-7]*"          => Number::Integer(i64::from_str_radix(<>, 8).unwrap()),
     r"0b[0-1]+"         => Number::Integer(i64::from_str_radix(&<>[2..], 2).unwrap()),
-    r"[1-9][0-9]*"    => Number::Integer(i64::from_str(<>).unwrap())
+    r"[1-9][0-9]*"      => Number::Integer(i64::from_str(<>).unwrap())
 };
