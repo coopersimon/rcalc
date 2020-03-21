@@ -14,7 +14,9 @@ pub enum Expr {
     Add(Box<Expr>, Box<Expr>),
     Sub(Box<Expr>, Box<Expr>),
     Mul(Box<Expr>, Box<Expr>),
-    Div(Box<Expr>, Box<Expr>)
+    Div(Box<Expr>, Box<Expr>),
+    Mod(Box<Expr>, Box<Expr>),
+    Pow(Box<Expr>, Box<Expr>)
 }
 
 impl Expr {
@@ -34,6 +36,8 @@ impl Expr {
             Sub(l, r)   => l.eval(state)? - r.eval(state)?,
             Mul(l, r)   => l.eval(state)? * r.eval(state)?,
             Div(l, r)   => l.eval(state)? / r.eval(state)?,
+            Mod(l, r)   => l.eval(state)? % r.eval(state)?,
+            Pow(l, r)   => l.eval(state)?.pow(r.eval(state)?),
         }
     }
 }

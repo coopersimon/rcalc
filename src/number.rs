@@ -4,7 +4,8 @@ use std::{
         Sub,
         Mul,
         Div,
-        Neg
+        Neg,
+        Rem
     },
     fmt::{
         Display,
@@ -36,8 +37,8 @@ pub enum Number {
 
 impl Number {
     pub fn base_string(&self, base: &Base) -> String {
-        use self::Number::*;
-        use self::Base::*;
+        use Number::*;
+        use Base::*;
         match self {
             Integer(i) => match base {
                 Decimal(p)      => if let Some(p) = p {
@@ -72,11 +73,25 @@ impl Number {
             }
         }
     }
+
+    pub fn pow(&self, to_power: Number) -> NumberResult {
+        use Number::*;
+        Ok(match self {
+            Integer(l) => match to_power {
+                Integer(r) => Integer(l.pow(r as u32)),
+                Fraction(r) => Fraction((*l as f64).powf(r)),
+            },
+            Fraction(l) => match to_power {
+                Integer(r) => Fraction(l.powi(r as i32)),
+                Fraction(r) => Fraction(l.powf(r)),
+            }
+        })
+    }
 }
 
 impl Display for Number {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        use self::Number::*;
+        use Number::*;
         match self {
             Integer(i) => write!(f, "{}", i),
             Fraction(d) => write!(f, "{}", d)
@@ -171,6 +186,37 @@ impl Div for Number {
                     (Integer(l), Fraction(r))   => Fraction(l as Ftype / r),
                     (Fraction(l), Integer(r))   => Fraction(l / r as Ftype),
                     (Fraction(l), Fraction(r))  => Fraction(l / r),
+                };
+                match ans {
+                    Fraction(f) => if f.is_finite() { Ok(ans) } else { Err(RuntimeError::NaNFloatResult) },
+                    other       => Ok(other)
+                }
+            }
+        }
+    }
+}
+
+impl Rem for Number {
+    type Output = NumberResult;
+
+    fn rem(self, other: Self) -> Self::Output {
+        use Number::*;
+        match other {
+            Integer(0)  => Err(RuntimeError::DivByZero),
+            other       => {
+                let ans = match (self, other) {
+                    (Integer(l), Integer(r)) => {
+                        let d = l as Ftype % r as Ftype;
+                        let i = l % r;
+                        if i as Ftype == d {
+                            Integer(i)
+                        } else {
+                            Fraction(d)
+                        }
+                    },
+                    (Integer(l), Fraction(r))   => Fraction(l as Ftype % r),
+                    (Fraction(l), Integer(r))   => Fraction(l % r as Ftype),
+                    (Fraction(l), Fraction(r))  => Fraction(l % r),
                 };
                 match ans {
                     Fraction(f) => if f.is_finite() { Ok(ans) } else { Err(RuntimeError::NaNFloatResult) },
